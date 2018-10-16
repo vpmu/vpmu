@@ -1,0 +1,79 @@
+/*
+The pedestrian begins between xingYMin and xingYMax and moves in both the x and y direction.
+
+The pedestrian's movement in the y direction is modeled using a continuous model and the
+pedestrian's movement in the x direction is modeled using a discrete model (ped is either in the crosswalk or not,
+and can change this fact instantaneously). This forms a strict superset of the more realistic dynamics where
+the pedestrian's movement through the crosswalk with smooth dynamics. This modeling choice is reasonable because
+the pedestrian might e.g., choose to stand in the middle of the crosswalk or appear in the middle of the crosswalk
+instantaneously (due to occulsion by a car parked too close to the crosswalk, for example). 
+This modeling choice also captures a notion of blame -- the car must simply avoid hitting the pedestrian while the pedestrian occupies the corsswalk.
+
+The pedestrian will always move forward, as will the car.
+
+The pedestrian will either start crossing before reacing xingYMax or else will not cross the street.
+
+The car will not move in the x direction.
+
+|         |
+|         |
+|         |
+|         |
+|=========| <- xingYMax
+|\  \P \  | <- pedestrian with xingMin < pedx <= xingMax
+| \  \  \ |
+|=========| <- xingYMin
+|         |
+|         |
+|CarCarCar| <- y coordinate of the car; car will move up.
+
+
+*/
+ProgramVariables.
+  R A.
+  R B.
+  R t.
+  R T.
+  R p.
+  R pmax.
+  R pedx.
+  R pedy.
+  R posy. /* y coordinte of the car. */
+  R posx.
+  R vel.
+  R acc.
+  R xingYMin.
+  R xingYMax.
+End.
+Problem.
+A>0 & B>0 & T>0 & 
+0 < p&p < pmax &
+-B+pmax < 0 & 
+pedy - posy > vel^2/(-2*(-B+pmax)) &
+pedy > xingYMin &
+(pedy > xingYMax  -> pedx != posx)
+->
+[{
+  {
+    {
+      /* If the pedestiran's y coord in still in the crosswalk's range, allow its x coord to be in the crosswalk. */
+      ?xingYMin < pedy & pedy+T < xingYMax;
+      pedx := posx;
+      ++
+      pedx := posx + 1; /* otherwise move pedestrian out of the crosswalk. */
+    }
+    {
+      acc := -B;
+      ++
+      ?pedy > xingYMax | pedy - (posy + ((A+pmax)*T^2/2 + T*vel)) > (vel + T*(A+pmax))^2/(-2*(-B + pmax));
+      acc := A;
+    }
+    t := 0;
+  }
+  {pedy'=1,posy'=vel,vel'=acc+p,t'=1 & vel >=0 & t <= T}
+}*@invariant(
+(pedy <= xingYMax -> pedy - posy > vel^2/(-2*(-B+pmax))) &
+(pedy > xingYMax  -> pedx != posx) &
+pedy > xingYMin
+)](posx != pedx | posy != pedy)
+End.

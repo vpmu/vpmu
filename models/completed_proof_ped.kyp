@@ -1,0 +1,117 @@
+﻿Lemma "awefawefwaefewfwfe: Proof 2".
+Sequent.
+
+==>
+Formula: (((A) > ((0)))&(((B) > ((0)))&(((T) > ((0)))&((((0)) < (p))&(((p) < (pmax))&((((-(B))+(pmax)) < ((0)))&((((pedy)-(posy)) > (((vel)^((2)))/(((-2))*((-(B))+(pmax)))))&(((pedy) > (xingYMin))&(((pedy) > (xingYMax))->((pedx) != (posx)))))))))))->([{{{{{?(((xingYMin) < (pedy))&(((pedy)+(T)) < (xingYMax)));};{pedx:=posx;}}++{pedx:=(posx)+((1));}};{{{acc:=-(B);}++{{?(((pedy) > (xingYMax))|(((pedy)-((posy)+(((((A)+(pmax))*((T)^((2))))/((2)))+((T)*(vel))))) > ((((vel)+((T)*((A)+(pmax))))^((2)))/(((-2))*((-(B))+(pmax))))));};{acc:=A;}}};{t:=(0);}}};{{pedy'=(1),posy'=vel,vel'=(acc)+(p),t'=(1)&((vel) >= ((0)))&((t) <= (T))}}}*](((posx) != (pedx))|((posy) != (pedy))))
+
+End.
+Tool.
+  tool """"KeYmaera X""""
+  model """"/*
+The pedestrian begins between xingYMin and xingYMax and moves in both the x and y direction.
+The pedestrian will always move forward, as will the car.
+The pedestrian will either start crossing before reacing xingYMax or else will not cross the street.
+
+The car will not move in the x direction.
+
+|         |
+|         |
+|         |
+|         |
+|=========| <- xingYMax
+|\  \P \  | <- pedestrian with xingMin < pedx <= xingMax
+| \  \  \ |
+|=========| <- xingYMin
+|         |
+|         |
+|   C     | <- y coordinate of car
+
+
+*/
+ProgramVariables.
+  R A.
+  R B.
+  R t.
+  R T.
+  R p.
+  R pmax.
+  R pedx.
+  R pedy.
+  R posy. /* y coordinte of the car. */
+  R posx.
+  R vel.
+  R acc.
+  R xingYMin.
+  R xingYMax.
+End.
+Problem.
+A>0 & B>0 & T>0 & 
+0 < p&p < pmax &
+-B+pmax < 0 & 
+pedy - posy > vel^2/(-2*(-B+pmax)) &
+pedy > xingYMin &
+(pedy > xingYMax  -> pedx != posx)
+->
+[{
+  {
+    {
+      /* If the pedestiran's y coord in still in the crosswalk, allow it to
+       * be in the crosswalk. */
+      ?xingYMin < pedy & pedy+T < xingYMax;
+      pedx := posx;
+      ++
+      pedx := posx + 1; /* otherwise move pedestrian out of the crosswalk. */
+    }
+    {
+      acc := -B;
+      ++
+      ?pedy > xingYMax | pedy - (posy + ((A+pmax)*T^2/2 + T*vel)) > (vel + T*(A+pmax))^2/(-2*(-B + pmax));
+      acc := A;
+    }
+    t := 0;
+  }
+  {pedy'=1,posy'=vel,vel'=acc+p,t'=1 & vel >=0 & t <= T}
+}*@invariant(
+(pedy <= xingYMax -> pedy - posy > vel^2/(-2*(-B+pmax))) &
+(pedy > xingYMax  -> pedx != posx) &
+pedy > xingYMin
+)](posx != pedx | posy != pedy)
+End.""""
+  tactic """"implyR(1) ; loop({`(pedy<=xingYMax->pedy-posy>vel^2/(-2*(-B+pmax)))&(pedy>xingYMax->pedx!=posx)&pedy>xingYMin`}, 1) ; <(
+  QE,
+  QE,
+  composeb(1) ; composeb(1) ; choiceb(1) ; andR(1) ; <(
+    composeb(1) ; testb(1) ; implyR(1) ; assignb(1) ; composeb(1) ; solve(1.1.1) ; choiceb(1) ; andR(1) ; <(
+      assignb(1) ; assignb(1) ; QE,
+      composeb(1) ; testb(1) ; implyR(1) ; orL(-9) ; <(
+        hideR(1=={`[acc:=A;][t:=0;]\forall t_ (t_>=0->\forall s_ (0<=s_&s_<=t_->(acc+p)*s_+vel>=0&s_+t<=T)->(t_+pedy<=xingYMax->t_+pedy-((acc+p)/2*t_^2+vel*t_+posy)>((acc+p)*t_+vel)^2/(-2*(-B+pmax)))&t_+pedy<=xingYMax&t_+pedy>xingYMin)`}) ; QE,
+        assignb(1) ; assignb(1) ; allR(1) ; implyR(1) ; implyR(1) ; andR(1) ; <(
+          implyR(1) ; QE,
+          QE
+          )
+        )
+      ),
+    assignb(1) ; composeb(1) ; solve(1.1.1) ; choiceb(1) ; andR(1) ; <(
+      assignb(1) ; assignb(1) ; QE,
+      composeb(1) ; testb(1) ; implyR(1) ; assignb(1.1) ; assignb(1) ; orL(-8) ; <(
+        QE,
+        allR(1) ; implyR(1) ; implyR(1) ; andR(1) ; <(
+          implyR(1) ; QE,
+          andR(1) ; <(
+            QE,
+            QE
+            )
+          )
+        )
+      )
+    )
+  )""""
+End.
+
+Tool.
+  kyxversion """"4.5.0""""
+End.
+
+Hash.
+  hash """"6815b86a7d534ddee881224bf21dfbeb""""
+End.

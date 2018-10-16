@@ -1,0 +1,6 @@
+unfold ; loop({`(pedy<=xingYMax->pedx-posx>vel^2/(-2*(-B+pmax)))&(pedy>xingYMax->pedx!=posx)`}, 1) ; <(
+  QE,
+  QE,
+  /* solve the ODEs first instead of solving them in each of the 2*2 cases. */
+  composeb(1) ; solve(1.1); master
+)

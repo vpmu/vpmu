@@ -1,0 +1,33 @@
+ProgramVariables.
+  R A.
+  R B.
+  R t.
+  R T.
+  R obsPos.
+  R pos.
+  R vel.
+  R acc.
+  R p.
+  R pmax.
+End.
+Problem.
+A>0 & B>0 & T>0 & 
+0 < p&p < pmax &
+-B+pmax < 0 & 
+obsPos - pos > vel^2/(-2*(-B+pmax))
+->
+[{
+  {
+    {
+      acc := -B;
+      ++
+      ?obsPos - (pos + ((A+pmax)*T^2/2 + T*vel)) > (vel + T*(A+pmax))^2/(-2*(-B + pmax));
+      acc := A;
+    }
+    t := 0;
+  }
+  {pos'=vel,vel'=acc+p,t'=1 & vel >=0 & t <= T}
+}*@invariant(
+obsPos - pos > vel^2/(-2*(-B+pmax))
+)]obsPos > pos
+End.
